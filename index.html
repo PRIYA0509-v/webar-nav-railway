@@ -19,24 +19,17 @@
     .btn { appearance: none; border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 600; cursor: pointer; width: 100%; }
     .btn-primary { background: var(--accent); color: #020617; }
     .badge { font-size: 12px; color: var(--muted); }
-    .hero { position: fixed; top: 56px; left: 0; right: 0; display: grid; place-items: center; z-index: 5; }
-    .hero img { width: 160px; opacity: 0.85; }
     .cam-permission { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #000; z-index: 100; }
     .cam-permission.show { display: flex; }
     .cam-permission .inner { color: var(--fg); text-align:center; padding: 24px; }
   </style>
   <script>
-    // Helper: detect iOS PWA standalone
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-    // Register service worker if supported
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js').catch(console.warn);
       });
     }
 
-    // Simple camera permission overlay for UX
     document.addEventListener('DOMContentLoaded', () => {
       const overlay = document.getElementById('perm');
       setTimeout(() => overlay.classList.remove('show'), 2500);
@@ -51,19 +44,15 @@
     <div class="dot"></div>
     <div>
       <div class="title">Railway WebAR Scanner</div>
-      <div class="hint">Point the camera at the <b>HIRO</b> marker to begin</div>
+      <div class="hint">Marker-less AR — ready to use</div>
     </div>
-  </div>
-
-  <div class="hero">
-    <img src="assets/hiro_preview.svg" alt="Marker preview (HIRO)" />
   </div>
 
   <div class="overlay">
     <div class="card">
       <div class="row">
-        <div class="badge">Marker status: <span id="mkStatus">Waiting…</span></div>
-        <button id="openBtn" class="btn btn-primary" disabled>Open Navigation</button>
+        <div class="badge">Status: <span id="mkStatus">Ready</span></div>
+        <button id="openBtn" class="btn btn-primary">Open Navigation</button>
       </div>
     </div>
   </div>
@@ -71,7 +60,7 @@
   <div id="perm" class="cam-permission show">
     <div class="inner">
       <h2>Enabling Camera…</h2>
-      <p>Please allow camera access to scan the AR marker.</p>
+      <p>Please allow camera access to start AR navigation.</p>
     </div>
   </div>
 
@@ -79,42 +68,20 @@
     vr-mode-ui="enabled: false"
     embedded
     renderer="logarithmicDepthBuffer: true; precision: highp;"
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; maxDetectionRate: 30;"
+    arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
   >
-    <!-- Use built-in HIRO marker so you don't need a patt file -->
-    <a-marker preset="hiro" id="nav-marker">
-      <!-- A simple arrow made of primitives -->
-      <!-- Marker-less: objects appear immediately -->
-<a-entity position="0 0 -2">
-  <a-cylinder position="0 0.15 0" radius="0.025" height="0.3"></a-cylinder>
-  <a-cone position="0 0.35 0" radius-bottom="0.09" radius-top="0.0" height="0.15"></a-cone>
-  <a-animation attribute="rotation" to="0 360 0" dur="6000" easing="linear" repeat="indefinite"></a-animation>
-</a-entity>
-<a-entity position="0 0 -2.3" text="value: Entrance → Platform 1; align: center; width: 2"></a-entity>
-<a-entity camera></a-entity>
-
+    <!-- Marker-less: objects appear immediately -->
+    <a-entity position="0 0 -2">
+      <a-cylinder position="0 0.15 0" radius="0.025" height="0.3"></a-cylinder>
+      <a-cone position="0 0.35 0" radius-bottom="0.09" radius-top="0.0" height="0.15"></a-cone>
+      <a-animation attribute="rotation" to="0 360 0" dur="6000" easing="linear" repeat="indefinite"></a-animation>
+    </a-entity>
+    <a-entity position="0 0 -2.3" text="value: Entrance → Platform 1; align: center; width: 2"></a-entity>
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    const statusEl = document.getElementById('mkStatus');
     const openBtn = document.getElementById('openBtn');
-    const marker = document.getElementById('nav-marker');
-
-    let detected = false;
-    function onFound() {
-      detected = true;
-      statusEl.textContent = 'Detected';
-      openBtn.disabled = false;
-    }
-    function onLost() {
-      detected = false;
-      statusEl.textContent = 'Waiting…';
-      openBtn.disabled = true;
-    }
-
-    marker.addEventListener('markerFound', onFound);
-    marker.addEventListener('markerLost', onLost);
-
     openBtn.addEventListener('click', () => {
       window.location.href = 'nav.html';
     });
