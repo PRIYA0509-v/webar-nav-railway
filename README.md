@@ -33,6 +33,10 @@ When the **HIRO marker** is detected, the page enables the **Open Navigation** b
 - After you deploy (e.g., `https://yourname.github.io/your-repo/`), generate a QR code pointing to your **`index.html`**.
 - Print and place the QR near station entrances.
 
+### 📷 Ready-to-Scan
+![Scan this QR](webar_nav_qr.png)
+
+
 ## Common issues
 - **Camera not opening**: Ensure the site is on **HTTPS** and you **allow camera permission**.
 - **Marker not detected**: Use a proper **HIRO marker** with high contrast and adequate lighting. Keep it steady and fill 30–60% of the screen.
