@@ -84,14 +84,15 @@
     <!-- Use built-in HIRO marker so you don't need a patt file -->
     <a-marker preset="hiro" id="nav-marker">
       <!-- A simple arrow made of primitives -->
-      <a-entity position="0 0 0">
-        <a-cylinder position="0 0.15 0" radius="0.025" height="0.3"></a-cylinder>
-        <a-cone position="0 0.35 0" radius-bottom="0.09" radius-top="0.0" height="0.15"></a-cone>
-        <a-animation attribute="rotation" to="0 360 0" dur="6000" easing="linear" repeat="indefinite"></a-animation>
-      </a-entity>
-      <a-entity position="0 0 0.3" text="value: Entrance → Platform 1; align: center; width: 2"></a-entity>
-    </a-marker>
-    <a-entity camera></a-entity>
+      <!-- Marker-less: objects appear immediately -->
+<a-entity position="0 0 -2">
+  <a-cylinder position="0 0.15 0" radius="0.025" height="0.3"></a-cylinder>
+  <a-cone position="0 0.35 0" radius-bottom="0.09" radius-top="0.0" height="0.15"></a-cone>
+  <a-animation attribute="rotation" to="0 360 0" dur="6000" easing="linear" repeat="indefinite"></a-animation>
+</a-entity>
+<a-entity position="0 0 -2.3" text="value: Entrance → Platform 1; align: center; width: 2"></a-entity>
+<a-entity camera></a-entity>
+
   </a-scene>
 
   <script>
