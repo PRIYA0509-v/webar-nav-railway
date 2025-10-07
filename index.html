@@ -81,21 +81,106 @@
 
   <script>
     const openBtn = document.getElementById('openBtn');
-    openBtn.addEventListener('click', () => {
-      window.location.href = 'nav.html';
-    });
-
-    // Target bearing (example: Platform 1 direction)
+    const mkStatus = document.getElementById('mkStatus');
+    const arrow = document.querySelector('#arrow');
+    // target bearing (example: Platform 1 direction)
     const targetBearing = 90; // 90° = East
 
-    // Update arrow rotation based on device heading
-    window.addEventListener('deviceorientationabsolute', (event) => {
-      if (event.alpha !== null) {
-        const heading = 360 - event.alpha; // Convert to compass heading
-        const rotation = targetBearing - heading;
-        document.querySelector('#arrow').setAttribute('rotation', `0 ${rotation} 0`);
+    openBtn.addEventListener('click', async () => {
+      // navigate to nav.html as before
+      // also try to request device orientation permission on iOS
+      await ensureOrientationPermission();
+      // Go to nav page (if you want to remain on this page to see arrow, comment next line)
+      // window.location.href = 'nav.html';
+    });
+
+    // Try to obtain permission for deviceorientation on iOS Safari
+    async function ensureOrientationPermission() {
+      mkStatus.textContent = 'Checking orientation permission...';
+      // iOS 13+ requires DeviceOrientationEvent.requestPermission
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const resp = await DeviceOrientationEvent.requestPermission();
+          if (resp === 'granted') {
+            mkStatus.textContent = 'Orientation permission granted';
+            startListening();
+            return;
+          } else {
+            mkStatus.textContent = 'Orientation permission denied';
+          }
+        } catch (err) {
+          console.warn('Permission request failed', err);
+          mkStatus.textContent = 'Orientation permission failed';
+        }
+      } else {
+        // Non-iOS path: start listening directly
+        startListening();
       }
-    }, true);
+    }
+
+    // Start listening for orientation events with fallbacks
+    function startListening() {
+      mkStatus.textContent = 'Listening for orientation...';
+
+      // Common event
+      window.addEventListener('deviceorientation', handleOrientation, true);
+
+      // Some browsers (older iOS) expose webkitCompassHeading on the event
+      // Also try absolute orientation event if available
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+
+      // Small timeout to detect if no events arrive
+      setTimeout(() => {
+        if (mkStatus.textContent === 'Listening for orientation...') {
+          mkStatus.textContent = 'No orientation data (try enabling motion sensors)';
+        }
+      }, 2500);
+    }
+
+    function handleOrientation(event) {
+      // Prefer webkitCompassHeading (iOS) if available
+      let heading = null;
+
+      if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+        // iOS provides heading in degrees directly (0 = north)
+        heading = event.webkitCompassHeading;
+      } else if (event.alpha !== null && event.alpha !== undefined) {
+        // event.alpha gives rotation around Z axis in degrees.
+        // Many devices report alpha relative to the device coordinate frame:
+        // convert to compass heading: heading = 360 - alpha
+        heading = 360 - event.alpha;
+      }
+
+      if (heading === null || isNaN(heading)) {
+        // no usable orientation
+        mkStatus.textContent = 'Orientation data unavailable';
+        return;
+      }
+
+      // Normalize heading to [0,360)
+      heading = ((heading % 360) + 360) % 360;
+
+      // compute rotation needed to point arrow to target bearing
+      // rotation around Y in A-Frame uses degrees with 0 forward, +y turning right
+      let rotationY = targetBearing - heading;
+
+      // normalize to -180..180 to avoid large jumps
+      if (rotationY > 180) rotationY -= 360;
+      if (rotationY < -180) rotationY += 360;
+
+      // Apply rotation to the arrow entity
+      if (arrow) {
+        // setAttribute accepts a string or object; both work. Use object for clarity.
+        arrow.setAttribute('rotation', { x: 0, y: rotationY, z: 0 });
+      }
+
+      // update status (rounded)
+      mkStatus.textContent = `Heading: ${Math.round(heading)}°, Arrow rot: ${Math.round(rotationY)}°`;
+    }
+
+    // If you want the arrow to start immediately (without clicking),
+    // call ensureOrientationPermission() here. Some browsers require user gesture.
+    // ensureOrientationPermission();
   </script>
 </body>
 </html>
