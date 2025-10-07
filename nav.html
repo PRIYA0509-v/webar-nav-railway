@@ -7,55 +7,80 @@
   <meta name="theme-color" content="#111827">
   <style>
     :root { --bg:#0b1220; --fg:#e5e7eb; --muted:#9ca3af; --accent:#22d3ee; }
-    html, body { margin:0; padding:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+    html, body { margin:0; padding:0; height:100%; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;}
     .container { max-width: 960px; margin: 0 auto; padding: 16px; }
-    .header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 12px 0; }
+    header.header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 12px 0; }
     .title { font-weight: 800; letter-spacing: .3px; }
     .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; margin: 12px 0; }
     .row { display:flex; gap:12px; align-items:center; justify-content:space-between; }
     .btn { appearance:none; border:0; border-radius:12px; padding:12px 16px; background:var(--accent); color:#020617; font-weight:700; cursor:pointer; }
     .muted { color: var(--muted); font-size: 14px; }
-    .list { display:grid; gap:10px; }
+    .list { display:grid; gap:10px; margin-top:8px; }
     .step { padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.08); }
     .map { width: 100%; height: 260px; border-radius: 16px; background: linear-gradient(180deg, rgba(34,211,238,0.12), transparent); display:grid; place-items:center; margin-top:8px; }
+    /* small responsive tweak */
+    @media (max-width:520px){
+      .row { flex-direction: column; align-items: flex-start; gap:8px; }
+      header.header { padding-bottom: 8px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
+    <header class="header" role="banner">
       <div>
         <div class="title">Navigation to Platform 1</div>
         <div class="muted">Sample flow after marker detection</div>
       </div>
-      <button class="btn" onclick="window.location.href='index.html'">Scan Again</button>
-    </div>
+      <!-- use type="button" so it doesn't accidentally submit forms, and attach click via JS -->
+      <button id="scanAgainBtn" type="button" class="btn" aria-label="Scan Again">Scan Again</button>
+    </header>
 
-    <div class="card">
-      <div class="row">
-        <div>
-          <div><b>Start:</b> Station Entrance</div>
-          <div class="muted">Detected marker: <b>HIRO</b></div>
+    <main>
+      <section class="card" aria-labelledby="start-heading">
+        <div class="row">
+          <div>
+            <div id="start-heading"><b>Start:</b> Station Entrance</div>
+            <div class="muted">Detected marker: <b>HIRO</b></div>
+          </div>
+          <div>
+            <b>ETA:</b> 3 min
+          </div>
         </div>
-        <div>
-          <b>ETA:</b> 3 min
+      </section>
+
+      <section class="card" aria-labelledby="steps-heading">
+        <div id="steps-heading"><b>Steps</b></div>
+        <div class="list" aria-live="polite">
+          <div class="step">1. Walk straight for 40 meters.</div>
+          <div class="step">2. Turn right at Ticket Counter.</div>
+          <div class="step">3. Follow signs to Platform 1.</div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="card">
-      <div><b>Steps</b></div>
-      <div class="list">
-        <div class="step">1. Walk straight for 40 meters.</div>
-        <div class="step">2. Turn right at Ticket Counter.</div>
-        <div class="step">3. Follow signs to Platform 1.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div><b>Mini Map</b></div>
-      <div class="map">[ Placeholder map ]</div>
-      <div class="muted">Replace with your station floor plan image.</div>
-    </div>
+      <section class="card" aria-labelledby="map-heading">
+        <div id="map-heading"><b>Mini Map</b></div>
+        <!-- role & aria-label help assistive tech -->
+        <div class="map" role="img" aria-label="Station mini map placeholder. Replace with floor plan image.">
+          [ Placeholder map ]
+        </div>
+        <div class="muted">Replace with your station floor plan image.</div>
+      </section>
+    </main>
   </div>
+
+  <script>
+    // Attach navigation to the Scan Again button in JS rather than inline HTML.
+    // This is more testable and avoids accidental execution in contexts that
+    // expect no inline handlers.
+    (function () {
+      const scanBtn = document.getElementById('scanAgainBtn');
+      if (!scanBtn) return;
+      scanBtn.addEventListener('click', () => {
+        // navigate to the scanning page; adjust path if needed
+        window.location.href = 'index.html';
+      });
+    })();
+  </script>
 </body>
 </html>
